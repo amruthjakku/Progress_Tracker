@@ -30,18 +30,32 @@ class DatabaseManager:
             "updated_at": now
         }
         
-        if status == "in_progress" and not self.db.progress.find_one(
-            {"user_email": user_email, "task_id": task_id}
-        ):
-            update_data["started_at"] = now
+        # Get existing progress
+        progress = self.db.progress.find_one({"user_email": user_email, "task_id": task_id})
+        
+        if status == "in_progress":
+            if not progress:
+                # New task being started
+                update_data["started_at"] = now
+            elif progress.get("status") == "done":
+                # Task being unmarked as done, keep existing started_at
+                if "completed_at" in update_data:
+                    update_data.pop("completed_at")
+                if "time_spent" in update_data:
+                    update_data.pop("time_spent")
         
         if status == "done":
             update_data["completed_at"] = now
             # Calculate time spent
-            progress = self.db.progress.find_one({"user_email": user_email, "task_id": task_id})
             if progress and progress.get("started_at"):
                 time_spent = (now - progress["started_at"]).total_seconds() / 3600  # hours
                 update_data["time_spent"] = time_spent
+        
+        if status == "not_started":
+            # Reset progress tracking fields
+            update_data["started_at"] = None
+            update_data["completed_at"] = None
+            update_data["time_spent"] = None
         
         if submission_link:
             update_data["submission_link"] = submission_link

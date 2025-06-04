@@ -143,8 +143,18 @@ def render_intern_dashboard(user_id, user_email):
                         )
                 
                 with col2:
-                    if status != "done":
-                        if st.button("Mark as Done", key=f"done_{task_id}"):
+                    if status == "done":
+                        if st.button("✓ Unmark as Done", key=f"done_{task_id}", type="secondary"):
+                            db_manager.update_task_progress(
+                                user_email,
+                                task_id,
+                                "in_progress" if progress.get("submission_link") else "not_started",
+                                progress.get("submission_link")
+                            )
+                            st.info("Task unmarked!")
+                            st.rerun()
+                    else:
+                        if st.button("Mark as Done ✓", key=f"done_{task_id}", type="primary"):
                             db_manager.update_task_progress(
                                 user_email,
                                 task_id,
@@ -153,8 +163,6 @@ def render_intern_dashboard(user_id, user_email):
                             )
                             st.success("Marked as done!")
                             st.rerun()
-                    else:
-                        st.success("Completed!")
     
     with tab3:
         st.header("Your Performance")
