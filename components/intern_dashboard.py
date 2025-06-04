@@ -112,7 +112,7 @@ def render_intern_dashboard(user_id, user_email):
                             upsert=True
                         )
                         st.success("Marked as done!")
-                        st.experimental_rerun()
+                        st.rerun()  # Updated from experimental_rerun to rerun
                 else:
                     st.success("Completed!")
             
