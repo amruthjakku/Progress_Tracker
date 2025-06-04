@@ -1,5 +1,7 @@
 streamlit
-supabase
+pymongo[srv]
+plotly
+pandas
+certifi
+python-dotenv
 requests
-streamlit-extras
-streamlit-authenticator
