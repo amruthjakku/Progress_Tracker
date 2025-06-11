@@ -32,8 +32,14 @@ print("="*50 + "\n")
 
 st.set_page_config(page_title="Intern Progress Tracker", page_icon="🚀", layout="wide")
 
-mongo_client = get_mongo_client()
-db = mongo_client["progress_tracker"]
+# Initialize MongoDB connection with error handling
+try:
+    mongo_client = get_mongo_client()
+    db = mongo_client["progress_tracker"]
+except Exception as e:
+    st.error(f"Failed to connect to the database. Please try again later or contact support.")
+    st.error(f"Error details: {str(e)}")
+    st.stop()
 
 # --- Auth (Google) ---
 if 'user' not in st.session_state:
@@ -78,12 +84,62 @@ if page == "Logout":
 
 # --- Main Content ---
 if page == "Intern Dashboard":
-    # Fetch user_id from users collection
-    user_data = db.users.find_one({"email": user['email']}, {"_id": 1})
-    user_id = str(user_data["_id"]) if user_data else None
-    render_intern_dashboard(user_id, user['email'])
+    try:
+        # Fetch user_id from users collection with retry
+        from pymongo.errors import ConnectionFailure, OperationFailure, NetworkTimeout
+        
+        max_retries = 3
+        retry_delay = 1
+        user_data = None
+        
+        for attempt in range(max_retries):
+            try:
+                user_data = db.users.find_one({"email": user['email']}, {"_id": 1})
+                break  # Success, exit the retry loop
+            except (ConnectionFailure, NetworkTimeout) as e:
+                if attempt < max_retries - 1:
+                    import time
+                    st.warning(f"Database connection issue. Retrying... ({attempt+1}/{max_retries})")
+                    time.sleep(retry_delay)
+                else:
+                    st.error(f"Failed to fetch user data after {max_retries} attempts.")
+                    st.error(f"Please try refreshing the page or contact support.")
+                    st.stop()
+        
+        # Safely convert user_id to string with error handling
+        try:
+            user_id = str(user_data["_id"]) if user_data and "_id" in user_data else None
+        except Exception as e:
+            st.error(f"Error processing user data: {str(e)}")
+            user_id = None
+        
+        # If user not found, create a temporary user for demo purposes
+        if not user_id:
+            st.warning("User not found in database. Creating a temporary user for demo purposes.")
+            from models.database import DatabaseManager
+            db_manager = DatabaseManager()
+            user_id = db_manager.create_user(user['email'], user['email'], role)
+            if not user_id:
+                st.error("Failed to create temporary user. Please contact support.")
+                st.stop()
+        
+        # Ensure we have valid parameters before calling render_intern_dashboard
+        if user_id and user.get('email'):
+            render_intern_dashboard(user_id, user['email'])
+        else:
+            st.error("Missing required user information. Please try logging in again.")
+            st.session_state['user'] = None  # Force re-login
+            st.rerun()
+    except Exception as e:
+        st.error(f"An error occurred while loading the dashboard: {str(e)}")
+        st.error("Please try refreshing the page or contact support.")
+        
 elif page == "Mentor Dashboard":
-    render_mentor_dashboard()
+    try:
+        render_mentor_dashboard()
+    except Exception as e:
+        st.error(f"An error occurred while loading the mentor dashboard: {str(e)}")
+        st.error("Please try refreshing the page or contact support.")
 
 # --- Footer ---
 st.markdown("""

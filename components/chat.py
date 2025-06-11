@@ -22,18 +22,53 @@ def render_chat(user_email: str, other_user: str = None, room: str = None):
         st.write(f"### 💬 Chat with {db.get_user_name(other_user)}")
         # Mark messages from other user as read
         db.mark_messages_read(user_email, other_user)
+        
+        # Add video call button for direct messages
+        col1, col2 = st.columns([3, 1])
+        with col2:
+            meeting_link = f"https://virtual.swecha.org/room/direct-{user_email.split('@')[0]}-{other_user.split('@')[0]}"
+            if st.button("🎥 Video Call", key=f"video_call_{user_email}_{other_user}", use_container_width=True):
+                # Log the meeting
+                db.log_meeting(f"direct-{user_email}-{other_user}", meeting_link, user_email)
+                # Open the meeting link in a new tab
+                st.markdown(f'<script>window.open("{meeting_link}", "_blank");</script>', unsafe_allow_html=True)
+                st.success(f"Meeting created! Opening {meeting_link}")
+            
     elif room:
         # Get room purpose for display
         rooms = db.get_chat_rooms()
         room_info = next((r for r in rooms if r.get("name", "") == room), None)
         room_purpose = room_info.get("purpose", "") if room_info else ""
         
-        # Display room name and purpose
-        st.write(f"### 💬 #{room}")
-        if room_purpose:
-            st.caption(f"{room_purpose}")
+        # Display room name and purpose with video meeting button
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            st.write(f"### 💬 #{room}")
+            if room_purpose:
+                st.caption(f"{room_purpose}")
+        with col2:
+            # Create a standardized room link based on the room name
+            meeting_link = f"https://virtual.swecha.org/room/{room.replace(' ', '-')}"
+            if st.button("🎥 Join Meeting", key=f"join_meeting_{room}", use_container_width=True):
+                # Log the meeting
+                db.log_meeting(room, meeting_link, user_email)
+                # Open the meeting link in a new tab
+                st.markdown(f'<script>window.open("{meeting_link}", "_blank");</script>', unsafe_allow_html=True)
+                st.success(f"Meeting created! Opening {meeting_link}")
+            
     else:
-        st.write("### 💬 General Chat Room")
+        # General chat room with video meeting option
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            st.write("### 💬 General Chat Room")
+        with col2:
+            meeting_link = "https://virtual.swecha.org/room/progress-tracker-general"
+            if st.button("🎥 Join Meeting", key="join_general_meeting", use_container_width=True):
+                # Log the meeting
+                db.log_meeting("general", meeting_link, user_email)
+                # Open the meeting link in a new tab
+                st.markdown(f'<script>window.open("{meeting_link}", "_blank");</script>', unsafe_allow_html=True)
+                st.success(f"Meeting created! Opening {meeting_link}")
     
     # Chat messages container with custom styling
     chat_container = st.container()
@@ -86,8 +121,8 @@ def render_chat_sidebar(user_email: str, role: str):
     with st.sidebar:
         st.write("### 💬 Chat")
         
-        # Create tabs for Direct Messages and Rooms
-        dm_tab, rooms_tab = st.tabs(["Direct Messages", "Rooms"])
+        # Create tabs for Direct Messages, Rooms, and Meetings
+        dm_tab, rooms_tab, meetings_tab = st.tabs(["Direct Messages", "Rooms", "Meetings"])
         
         with dm_tab:
             if role == "intern":
@@ -183,3 +218,28 @@ def render_chat_sidebar(user_email: str, role: str):
                 # Show room purpose as a tooltip/caption
                 if room_purpose:
                     st.caption(f"{room_purpose[:40]}..." if len(room_purpose) > 40 else room_purpose)
+        
+        with meetings_tab:
+            # Get recent meetings
+            recent_meetings = db.get_recent_meetings(limit=10)
+            
+            if recent_meetings:
+                st.write("#### Recent Meetings")
+                
+                for meeting in recent_meetings:
+                    meeting_time = meeting.get("created_at", datetime.now()).strftime("%m/%d %I:%M %p")
+                    room_name = meeting.get("room_name", "Unknown")
+                    meeting_link = meeting.get("meeting_link", "#")
+                    creator = db.get_user_name(meeting.get("created_by", "Unknown"))
+                    
+                    # Create a collapsible section for each meeting
+                    with st.expander(f"{room_name} ({meeting_time})"):
+                        st.write(f"Created by: {creator}")
+                        st.write(f"Room: {room_name}")
+                        
+                        # Join button
+                        if st.button("🎥 Join", key=f"join_meeting_{str(meeting.get('_id', ''))}"):
+                            st.markdown(f'<script>window.open("{meeting_link}", "_blank");</script>', unsafe_allow_html=True)
+                            st.success(f"Opening meeting...")
+            else:
+                st.info("No recent meetings found. Create one by clicking 'Join Meeting' in any chat room.")
