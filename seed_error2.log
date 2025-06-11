@@ -1,0 +1,47 @@
+Traceback (most recent call last):
+  File "/workspaces/Progress_Tracker/utils/seed_tasks.py", line 58, in <module>
+    seed_tasks()
+  File "/workspaces/Progress_Tracker/utils/seed_tasks.py", line 53, in seed_tasks
+    db.tasks.delete_many({"assigned_to": "intern@example.com"})  # Remove old demo tasks
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/codespace/.python/current/lib/python3.12/site-packages/pymongo/synchronous/collection.py", line 1711, in delete_many
+    self._delete_retryable(
+  File "/home/codespace/.python/current/lib/python3.12/site-packages/pymongo/synchronous/collection.py", line 1587, in _delete_retryable
+    return self._database.client._retryable_write(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/codespace/.python/current/lib/python3.12/site-packages/pymongo/synchronous/mongo_client.py", line 2061, in _retryable_write
+    return self._retry_with_session(retryable, func, s, bulk, operation, operation_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/codespace/.python/current/lib/python3.12/site-packages/pymongo/synchronous/mongo_client.py", line 1947, in _retry_with_session
+    return self._retry_internal(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/codespace/.python/current/lib/python3.12/site-packages/pymongo/_csot.py", line 119, in csot_wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/codespace/.python/current/lib/python3.12/site-packages/pymongo/synchronous/mongo_client.py", line 1993, in _retry_internal
+    ).run()
+      ^^^^^
+  File "/home/codespace/.python/current/lib/python3.12/site-packages/pymongo/synchronous/mongo_client.py", line 2730, in run
+    return self._read() if self._is_read else self._write()
+                                              ^^^^^^^^^^^^^
+  File "/home/codespace/.python/current/lib/python3.12/site-packages/pymongo/synchronous/mongo_client.py", line 2840, in _write
+    self._server = self._get_server()
+                   ^^^^^^^^^^^^^^^^^^
+  File "/home/codespace/.python/current/lib/python3.12/site-packages/pymongo/synchronous/mongo_client.py", line 2823, in _get_server
+    return self._client._select_server(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/codespace/.python/current/lib/python3.12/site-packages/pymongo/synchronous/mongo_client.py", line 1812, in _select_server
+    server = topology.select_server(
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/codespace/.python/current/lib/python3.12/site-packages/pymongo/synchronous/topology.py", line 409, in select_server
+    server = self._select_server(
+             ^^^^^^^^^^^^^^^^^^^^
+  File "/home/codespace/.python/current/lib/python3.12/site-packages/pymongo/synchronous/topology.py", line 387, in _select_server
+    servers = self.select_servers(
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/codespace/.python/current/lib/python3.12/site-packages/pymongo/synchronous/topology.py", line 294, in select_servers
+    server_descriptions = self._select_servers_loop(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/codespace/.python/current/lib/python3.12/site-packages/pymongo/synchronous/topology.py", line 344, in _select_servers_loop
+    raise ServerSelectionTimeoutError(
+pymongo.errors.ServerSelectionTimeoutError: SSL handshake failed: ac-7tkujki-shard-00-02.hc4q6ax.mongodb.net:27017: [SSL: TLSV1_ALERT_INTERNAL_ERROR] tlsv1 alert internal error (_ssl.c:1000) (configured timeouts: socketTimeoutMS: 20000.0ms, connectTimeoutMS: 20000.0ms),SSL handshake failed: ac-7tkujki-shard-00-00.hc4q6ax.mongodb.net:27017: [SSL: TLSV1_ALERT_INTERNAL_ERROR] tlsv1 alert internal error (_ssl.c:1000) (configured timeouts: socketTimeoutMS: 20000.0ms, connectTimeoutMS: 20000.0ms),SSL handshake failed: ac-7tkujki-shard-00-01.hc4q6ax.mongodb.net:27017: [SSL: TLSV1_ALERT_INTERNAL_ERROR] tlsv1 alert internal error (_ssl.c:1000) (configured timeouts: socketTimeoutMS: 20000.0ms, connectTimeoutMS: 20000.0ms), Timeout: 30s, Topology Description: <TopologyDescription id: 684076951a5db3fe0fa02047, topology_type: ReplicaSetNoPrimary, servers: [<ServerDescription ('ac-7tkujki-shard-00-00.hc4q6ax.mongodb.net', 27017) server_type: Unknown, rtt: None, error=AutoReconnect('SSL handshake failed: ac-7tkujki-shard-00-00.hc4q6ax.mongodb.net:27017: [SSL: TLSV1_ALERT_INTERNAL_ERROR] tlsv1 alert internal error (_ssl.c:1000) (configured timeouts: socketTimeoutMS: 20000.0ms, connectTimeoutMS: 20000.0ms)')>, <ServerDescription ('ac-7tkujki-shard-00-01.hc4q6ax.mongodb.net', 27017) server_type: Unknown, rtt: None, error=AutoReconnect('SSL handshake failed: ac-7tkujki-shard-00-01.hc4q6ax.mongodb.net:27017: [SSL: TLSV1_ALERT_INTERNAL_ERROR] tlsv1 alert internal error (_ssl.c:1000) (configured timeouts: socketTimeoutMS: 20000.0ms, connectTimeoutMS: 20000.0ms)')>, <ServerDescription ('ac-7tkujki-shard-00-02.hc4q6ax.mongodb.net', 27017) server_type: Unknown, rtt: None, error=AutoReconnect('SSL handshake failed: ac-7tkujki-shard-00-02.hc4q6ax.mongodb.net:27017: [SSL: TLSV1_ALERT_INTERNAL_ERROR] tlsv1 alert internal error (_ssl.c:1000) (configured timeouts: socketTimeoutMS: 20000.0ms, connectTimeoutMS: 20000.0ms)')>]>

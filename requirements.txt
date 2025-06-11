@@ -1,0 +1,9 @@
+streamlit
+pymongo[srv]
+plotly
+pandas
+certifi
+python-dotenv
+requests
+pydantic
+networkx
